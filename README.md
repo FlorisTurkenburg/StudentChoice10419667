@@ -13,5 +13,7 @@ List of features:
   - while playing music, the app should still be able to be used for viewing the songs and playlist, create new playlists, select a new song, etc.  
 
 
-Working on the mock ups:  
+![Overview of the app](/doc/Overview.png "Overview of the screens")
+
+Via this links you can view an interactive version of the mockups:  
 https://www.fluidui.com/editor/live/preview/p_VM6l0XTqhD2dIN671MLvJvRFJTQF19Sv.1412541208705
