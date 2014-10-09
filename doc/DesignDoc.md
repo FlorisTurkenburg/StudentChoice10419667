@@ -47,3 +47,6 @@ While in the view which displays the contents of a playlist, a menu is available
     + Basicly this is similar to the Main screen, excluding the third tab, and with checkboxes for the songs.
   - Remove Playlist;
     + This will delete the playlist after getting a confirmation from the user via an AlertDialog.
+
+
+![Overview of the app](/Overview.png "Overview of the screens")
