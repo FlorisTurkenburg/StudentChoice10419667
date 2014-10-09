@@ -6,13 +6,12 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="nl.mprog.projects.studentschoice10419667.MainActivity$PlaceholderFragment" >
-
+    tools:context="nl.mprog.projects.studentschoice10419667.PlaylistContentsActivity" >
 
     <ListView
-        android:id="@+id/artist_listview"
+        android:id="@+id/playlist_songs_listview"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         />
-    
+
 </RelativeLayout>

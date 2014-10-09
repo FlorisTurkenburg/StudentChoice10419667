@@ -1,7 +1,35 @@
-<android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/pager"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="nl.mprog.projects.studentschoice10419667.MainActivity" />
+    tools:context="nl.mprog.projects.studentschoice10419667.MainActivity" >
+	
+	<android.support.v4.view.ViewPager
+	    android:id="@+id/pager"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:layout_above="@+id/player"
+     />
 
+	<RelativeLayout
+	    android:id="@id/player"
+	    android:background="#ff0000"
+	    android:layout_width="fill_parent"
+	    android:layout_height="50dp"
+	    android:layout_alignParentBottom="true">
+	    
+	    <ImageButton
+	        android:id="@+id/play_button"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:src="@drawable/ic_action_play"
+	        android:layout_centerHorizontal="true"
+	        android:onClick="playButton"
+	        />
+	        
+	    
+	    
+	</RelativeLayout>
+
+
+</RelativeLayout>

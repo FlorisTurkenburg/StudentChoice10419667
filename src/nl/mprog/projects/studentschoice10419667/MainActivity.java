@@ -1,6 +1,7 @@
 
 package nl.mprog.projects.studentschoice10419667;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -185,6 +186,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
     
-    
+    public void playButton(View view) {
+        Intent intent = new Intent(this, MediaPlayerService.class);
+        stopService(intent);
+    }
     
 }

@@ -1,18 +1,23 @@
+
 package nl.mprog.projects.studentschoice10419667;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Audio;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-
+import android.widget.Toast;
 
 /**
- * A placeholder fragment containing a simple view.
+ * A placeholder fragment containing the Song list view.
  */
 public class SongFragment extends Fragment {
     /**
@@ -37,32 +42,57 @@ public class SongFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        
+
         View rootView = inflater.inflate(R.layout.fragment_song, container, false);
-        
-        
+
         return rootView;
     }
-    
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        String[] fromColumns = {
+                MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST
+        };
         
-        String[] fromColumns = {MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST};
-        int[] toViews = {R.id.song_title, R.id.song_artist};
+        int[] toViews = {
+                R.id.song_title, R.id.song_artist
+        };
+
+        String[] projection = {
+                MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.DATA
+        };
         
-        String[] projection = {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST};
-        Cursor cursor = getActivity().getContentResolver().query(
+        final Cursor cursor = getActivity().getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 projection,
                 null,
                 null,
                 MediaStore.Audio.Media.TITLE);
-        
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(),R.layout.song_list_row,cursor,fromColumns,toViews,0);
-        
-        ListView contactsList = (ListView) getActivity().findViewById(R.id.song_listview);
-        contactsList.setAdapter(adapter);
-        
+
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(),
+                R.layout.song_list_row, cursor, fromColumns, toViews, 0);
+
+        ListView songsList = (ListView) getActivity().findViewById(R.id.song_listview);
+        songsList.setAdapter(adapter);
+
+        final OnItemClickListener songClickedHandler = new OnItemClickListener() {
+            public void onItemClick(AdapterView parent, View v, int position, long id) {
+                cursor.moveToPosition(position);
+                Toast.makeText(getActivity(),
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)),
+                        Toast.LENGTH_SHORT).show();
+                
+                Intent intent = new Intent(getActivity(), MediaPlayerService.class);
+                getActivity().stopService(intent);
+                intent.putExtra("songUri", cursor.getString(cursor.getColumnIndex(Audio.Media.DATA)));
+                intent.setAction("com.example.action.PLAY");
+                getActivity().startService(intent);
+            }
+        };
+
+        songsList.setOnItemClickListener(songClickedHandler);
     }
 }
