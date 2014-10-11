@@ -49,4 +49,4 @@ While in the view which displays the contents of a playlist, a menu is available
     + This will delete the playlist after getting a confirmation from the user via an AlertDialog.
 
 
-![Overview of the app](/Overview.png "Overview of the screens")
+![Overview of the app](/doc/Overview.png "Overview of the screens")
