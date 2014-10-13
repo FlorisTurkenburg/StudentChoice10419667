@@ -4,9 +4,45 @@
     tools:context="nl.mprog.projects.studentschoice10419667.PlaylistContentsActivity" >
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never"/>
+        android:id="@+id/menu_overflow"
+        android:icon="@drawable/ic_action_overflow"
+        android:orderInCategory="111111"
+        android:title="@string/overflow"
+        app:showAsAction="always">
+    
+        <menu>
+	    <item
+	        android:id="@+id/add_songs"
+	        android:icon="@drawable/ic_action_new"
+	        android:orderInCategory="100"
+	        android:title="@string/add_songs"
+	        app:showAsAction="never"
+	        />
+	    
+	    <item
+	        android:id="@+id/delete_songs"
+	        android:orderInCategory="100"
+	        android:icon="@drawable/ic_action_discard"
+	        android:title="@string/delete_songs"
+	        app:showAsAction="never"/>
+	    
+	    <item
+	        android:id="@+id/edit_title"
+	        android:icon="@drawable/ic_action_edit"
+	        android:orderInCategory="100"
+	        android:title="@string/edit_title"
+	        app:showAsAction="never"
+	        />
+	    
+	    <item
+	        android:id="@+id/remove_playlist"
+	        android:icon="@drawable/ic_action_remove"
+	        android:orderInCategory="100"
+	        android:title="@string/remove_playlist"
+	        app:showAsAction="never"
+	        />
+"
+    </menu>
+    </item>
 
-</menu>
+</menu> 

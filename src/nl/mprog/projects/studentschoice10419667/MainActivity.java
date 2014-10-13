@@ -19,7 +19,11 @@ import android.view.ViewGroup;
 import java.util.Locale;
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
-
+    public static final String EXTRA_TAB = "studentschoice10419667.lastOpenedTab";
+    public static final int SONGSTAB = 0;
+    public static final int ARTISTSTAB = 1;
+    public static final int PLAYLISTSTAB = 2;
+    
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide fragments for each of the
      * sections. We use a {@link FragmentPagerAdapter} derivative, which will keep every loaded
@@ -32,11 +36,13 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      * The {@link ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
+    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -71,8 +77,17 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
-    }
+        
 
+    }
+    
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mSectionsPagerAdapter.notifyDataSetChanged();
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -122,11 +137,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             switch(position) {
-                case 0:
+                case SONGSTAB:
                     return SongFragment.newInstance(position + 1);
-                case 1:
+                case ARTISTSTAB:
                     return ArtistFragment.newInstance(position + 1);
-                case 2:
+                case PLAYLISTSTAB:
                     return PlaylistFragment.newInstance(position + 1);
                 default:
                     return PlaceholderFragment.newInstance(position + 1);                    
@@ -143,11 +158,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         public CharSequence getPageTitle(int position) {
             Locale l = Locale.getDefault();
             switch (position) {
-                case 0:
+                case SONGSTAB:
                     return getString(R.string.tab1).toUpperCase(l);
-                case 1:
+                case ARTISTSTAB:
                     return getString(R.string.tab2).toUpperCase(l);
-                case 2:
+                case PLAYLISTSTAB:
                     return getString(R.string.tab3).toUpperCase(l);
             }
             return null;

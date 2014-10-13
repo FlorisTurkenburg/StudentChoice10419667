@@ -17,17 +17,24 @@ public class ArtistSongsActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist_songs);
-        
+
         Intent intent = getIntent();
         final int artist_id = intent.getIntExtra(ArtistFragment.EXTRA_ARTIST_ID, -1);
-        
-        String[] fromColumns = {MediaStore.Audio.Media.TITLE};
-        
-        int[] toViews = {R.id.item};
-        
-        String[] projection = {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST_ID};
+
+        String[] fromColumns = {
+            MediaStore.Audio.Media.TITLE
+        };
+
+        int[] toViews = {
+            R.id.item
+        };
+
+        String[] projection = {
+                MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.ARTIST_ID, MediaStore.Audio.Media.ARTIST
+        };
         String selection = MediaStore.Audio.Media.ARTIST_ID + " = " + artist_id;
-        
+
         final Cursor cursor = getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 projection,
@@ -35,7 +42,11 @@ public class ArtistSongsActivity extends ActionBarActivity {
                 null,
                 MediaStore.Audio.Media.TITLE);
         
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.single_item_row, cursor, fromColumns, toViews, 0);
+        cursor.moveToFirst();
+        setTitle(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
+
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.single_item_row,
+                cursor, fromColumns, toViews, 0);
         ListView songList = (ListView) findViewById(R.id.artist_songs_listview);
         songList.setAdapter(adapter);
     }

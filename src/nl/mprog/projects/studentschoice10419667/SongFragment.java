@@ -52,6 +52,7 @@ public class SongFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        
         String[] fromColumns = {
                 MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST
         };
