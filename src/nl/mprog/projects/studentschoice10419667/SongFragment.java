@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -52,11 +53,10 @@ public class SongFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        
         String[] fromColumns = {
                 MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST
         };
-        
+
         int[] toViews = {
                 R.id.song_title, R.id.song_artist
         };
@@ -65,7 +65,7 @@ public class SongFragment extends Fragment {
                 MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,
                 MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.DATA
         };
-        
+
         final Cursor cursor = getActivity().getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 projection,
@@ -85,11 +85,13 @@ public class SongFragment extends Fragment {
                 Toast.makeText(getActivity(),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)),
                         Toast.LENGTH_SHORT).show();
-                
+
                 Intent intent = new Intent(getActivity(), MediaPlayerService.class);
-                getActivity().stopService(intent);
-                intent.putExtra("songUri", cursor.getString(cursor.getColumnIndex(Audio.Media.DATA)));
-                intent.setAction("com.example.action.PLAY");
+                intent.putExtra(MainActivity.EXTRA_DATA_URI,
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
+                intent.putExtra(MainActivity.EXTRA_SONG_ID,
+                        cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+                intent.setAction(MediaPlayerService.ACTION_PLAY);
                 getActivity().startService(intent);
             }
         };

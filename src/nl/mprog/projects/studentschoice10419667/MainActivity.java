@@ -1,8 +1,12 @@
 
 package nl.mprog.projects.studentschoice10419667;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -15,15 +19,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.TextView;
+
+import nl.mprog.projects.studentschoice10419667.MediaPlayerService.MediaPlayerBinder;
+import nl.mprog.projects.studentschoice10419667.MediaPlayerService.MediaPlayerCallback;
 
 import java.util.Locale;
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener,
+        MediaPlayerCallback {
     public static final String EXTRA_TAB = "studentschoice10419667.lastOpenedTab";
+    public static final String EXTRA_DATA_URI = "studentschoice10419667.dataUri";
+    public static final String EXTRA_SONG_ID = "studentschoice10419667.songId";
     public static final int SONGSTAB = 0;
     public static final int ARTISTSTAB = 1;
     public static final int PLAYLISTSTAB = 2;
-    
+
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide fragments for each of the
      * sections. We use a {@link FragmentPagerAdapter} derivative, which will keep every loaded
@@ -36,13 +48,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      * The {@link ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
-    
+
+    MediaPlayerService mService;
+    boolean mBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -77,17 +90,43 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
-        
 
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Intent intent = new Intent(this, MediaPlayerService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
     
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+        
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
         mSectionsPagerAdapter.notifyDataSetChanged();
+
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -101,7 +140,13 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.close_app) {
+            if (mBound) {
+                unbindService(mConnection);
+                mBound = false;
+            }
+            stopService(new Intent(this, MediaPlayerService.class));
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -136,7 +181,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            switch(position) {
+            switch (position) {
                 case SONGSTAB:
                     return SongFragment.newInstance(position + 1);
                 case ARTISTSTAB:
@@ -144,7 +189,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 case PLAYLISTSTAB:
                     return PlaylistFragment.newInstance(position + 1);
                 default:
-                    return PlaceholderFragment.newInstance(position + 1);                    
+                    return PlaceholderFragment.newInstance(position + 1);
             }
         }
 
@@ -195,15 +240,79 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            
+
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             return rootView;
         }
     }
-    
+
     public void playButton(View view) {
-        Intent intent = new Intent(this, MediaPlayerService.class);
-        stopService(intent);
+
+        if (mBound) {
+            ImageButton button = (ImageButton) view.findViewById(R.id.play_button);
+            Intent intent = new Intent(this, MediaPlayerService.class);
+            String state = mService.getState();
+
+            if (state.equals(MediaPlayerService.PLAYING)) {
+                button.setImageResource(R.drawable.ic_action_play);
+                intent.setAction(MediaPlayerService.ACTION_PAUSE);
+            } else if (state.equals(MediaPlayerService.PAUSED)) {
+                button.setImageResource(R.drawable.ic_action_pause);
+                intent.setAction(MediaPlayerService.ACTION_RESUME);
+            } else {
+                return;
+            }
+            startService(intent);
+        }
     }
-    
+
+    public void UpdateSongPlaying(String title, String artist) {
+        TextView titleText = (TextView) findViewById(R.id.player_song);
+        titleText.setText(title);
+        titleText.setSelected(true); // This will scroll the text if it is more than 1 line
+        TextView artistText = (TextView) findViewById(R.id.player_artist);
+        artistText.setText(artist);
+        if (mBound) {
+            String state = mService.getState();
+            ImageButton button = (ImageButton) findViewById(R.id.play_button);
+            if (state.equals(MediaPlayerService.PLAYING)) {
+                button.setImageResource(R.drawable.ic_action_pause);
+            } else if (state.equals(MediaPlayerService.PAUSED)) {
+                button.setImageResource(R.drawable.ic_action_play);
+            }
+        }
+
+    }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            MediaPlayerBinder binder = (MediaPlayerBinder) service;
+            mService = binder.getService();
+            mBound = true;
+            mService.setCallback(MainActivity.this);
+
+            // This will succeed if the service is re-connected, e.g. when configurations change.
+            // This block will make sure the "player" view contains the correct information.
+            try {
+                String state = mService.getState();
+                ImageButton button = (ImageButton) MainActivity.this.findViewById(R.id.play_button);
+                if (state.equals(MediaPlayerService.PLAYING)) {
+                    button.setImageResource(R.drawable.ic_action_pause);
+                } else if (state.equals(MediaPlayerService.PAUSED)) {
+                    button.setImageResource(R.drawable.ic_action_play);
+                }
+                mService.requestUpdate();
+            } catch (Exception e) {
+
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+
 }

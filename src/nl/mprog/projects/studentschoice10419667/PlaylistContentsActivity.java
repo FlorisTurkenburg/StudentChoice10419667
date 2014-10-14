@@ -2,11 +2,15 @@
 package nl.mprog.projects.studentschoice10419667;
 
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBarActivity;
@@ -14,14 +18,25 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView.BufferType;
 import android.widget.Toast;
 
-public class PlaylistContentsActivity extends ActionBarActivity {
+import nl.mprog.projects.studentschoice10419667.MediaPlayerService.MediaPlayerBinder;
+import nl.mprog.projects.studentschoice10419667.MediaPlayerService.MediaPlayerCallback;
+
+public class PlaylistContentsActivity extends ActionBarActivity implements MediaPlayerCallback {
     public static String PlaylistName;
     public static int playlist_id;
+    public static SimpleCursorAdapter adapter;
+
+    MediaPlayerService mService;
+    boolean mBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +55,58 @@ public class PlaylistContentsActivity extends ActionBarActivity {
                 R.id.song_title,
                 R.id.song_artist
         };
+
+        final Cursor cursor = getPlaylistContentCursor();
+
+        adapter = new SimpleCursorAdapter(this, R.layout.song_list_row, cursor,
+                fromColumns, toViews, 0);
+        ListView songList = (ListView) findViewById(R.id.playlist_songs_listview);
+        songList.setAdapter(adapter);
+
+        final OnItemClickListener songClickedHandler = new OnItemClickListener() {
+            public void onItemClick(AdapterView parent, View v, int position, long id) {
+                cursor.moveToPosition(position);
+                Toast.makeText(PlaylistContentsActivity.this,
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)),
+                        Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(PlaylistContentsActivity.this, MediaPlayerService.class);
+                intent.putExtra(MainActivity.EXTRA_DATA_URI, cursor.getString(cursor
+                        .getColumnIndex(MediaStore.Audio.Playlists.Members.DATA)));
+                intent.putExtra(MainActivity.EXTRA_SONG_ID, cursor.getInt(cursor
+                        .getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID)));
+                intent.setAction(MediaPlayerService.ACTION_PLAY);
+                startService(intent);
+            }
+        };
+
+        songList.setOnItemClickListener(songClickedHandler);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Intent intent = new Intent(this, MediaPlayerService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapter.swapCursor(getPlaylistContentCursor());
+    }
+
+    public Cursor getPlaylistContentCursor() {
 
         String[] projection = {
                 MediaStore.Audio.Playlists._ID,
@@ -66,7 +133,8 @@ public class PlaylistContentsActivity extends ActionBarActivity {
                     MediaStore.Audio.Playlists.Members._ID,
                     MediaStore.Audio.Playlists.Members.AUDIO_ID,
                     MediaStore.Audio.Playlists.Members.TITLE,
-                    MediaStore.Audio.Playlists.Members.ARTIST
+                    MediaStore.Audio.Playlists.Members.ARTIST,
+                    MediaStore.Audio.Playlists.Members.DATA
             };
 
             cursor = null;
@@ -78,10 +146,8 @@ public class PlaylistContentsActivity extends ActionBarActivity {
                     null);
         }
 
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.song_list_row, cursor,
-                fromColumns, toViews, 0);
-        ListView songList = (ListView) findViewById(R.id.playlist_songs_listview);
-        songList.setAdapter(adapter);
+        return cursor;
+
     }
 
     @Override
@@ -105,6 +171,10 @@ public class PlaylistContentsActivity extends ActionBarActivity {
             return true;
         } else if (id == R.id.delete_songs) {
             Intent intent = new Intent(this, PlaylistContentsDeleteActivity.class);
+            intent.putExtra(PlaylistFragment.EXTRA_PLAYLIST_ID, playlist_id);
+            startActivity(intent);
+        } else if (id == R.id.add_songs) {
+            Intent intent = new Intent(this, PlaylistContentsAddActivity.class);
             intent.putExtra(PlaylistFragment.EXTRA_PLAYLIST_ID, playlist_id);
             startActivity(intent);
         }
@@ -133,14 +203,14 @@ public class PlaylistContentsActivity extends ActionBarActivity {
 
             }
         })
-            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
 
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // User canceled the dialog.
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // User canceled the dialog.
 
-                }
-            });
+                    }
+                });
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -153,16 +223,17 @@ public class PlaylistContentsActivity extends ActionBarActivity {
             ContentValues values = new ContentValues(1);
             values.put(MediaStore.Audio.Playlists.NAME, newName);
             String selection = MediaStore.Audio.Playlists._ID + " = " + playlist_id;
-    
+
             getContentResolver().update(
                     MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
                     values,
                     selection,
                     null);
-    
+
             setTitle(newName);
         } else {
-            Toast.makeText(getApplicationContext(), "This name already exists!", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "This name already exists!", Toast.LENGTH_LONG)
+                    .show();
         }
 
     }
@@ -170,24 +241,26 @@ public class PlaylistContentsActivity extends ActionBarActivity {
     // If the new name already exists, this method returns true
     public boolean checkIfNameExists(String name) {
         String[] projection = {
-                MediaStore.Audio.Playlists._ID, 
+                MediaStore.Audio.Playlists._ID,
                 MediaStore.Audio.Playlists.NAME
         };
 
         String selection = MediaStore.Audio.Playlists.NAME + " = ? ";
-        String[] selectionArgs = {name}; 
-        
+        String[] selectionArgs = {
+            name
+        };
+
         Cursor cursor = getContentResolver().query(
                 MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
                 projection,
                 selection,
                 selectionArgs,
                 null);
-        
+
         // id is the ID of the playlist that is found to have the same name as the new name, if no
         // playlist if found for this name, id = -1
         int id = -1;
-        
+
         if (cursor != null) {
             cursor.moveToFirst();
             if (!cursor.isAfterLast()) {
@@ -195,15 +268,15 @@ public class PlaylistContentsActivity extends ActionBarActivity {
             }
         }
         cursor.close();
-        
+
         if (id == -1) {
             return false;
         } else {
             return true;
         }
-       
+
     }
-    
+
     // Display a confirmation dialog
     public void removePlaylist() {
         AlertDialog.Builder builder = new AlertDialog.Builder(PlaylistContentsActivity.this);
@@ -220,23 +293,94 @@ public class PlaylistContentsActivity extends ActionBarActivity {
 
             }
         })
-            .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // User canceled the dialog.
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // User canceled the dialog.
 
-                }
-            });
+                    }
+                });
 
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-    
+
     public void deletePlaylist() {
         String selection = MediaStore.Audio.Playlists._ID + " = " + playlist_id;
-        getContentResolver().delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, selection, null);
-        
+        getContentResolver().delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, selection,
+                null);
+
     }
+
+    public void playButton(View view) {
+
+        if (mBound) {
+            ImageButton button = (ImageButton) view.findViewById(R.id.play_button);
+            Intent intent = new Intent(this, MediaPlayerService.class);
+            String state = mService.getState();
+
+            if (state.equals(MediaPlayerService.PLAYING)) {
+                button.setImageResource(R.drawable.ic_action_play);
+                intent.setAction(MediaPlayerService.ACTION_PAUSE);
+            } else if (state.equals(MediaPlayerService.PAUSED)) {
+                button.setImageResource(R.drawable.ic_action_pause);
+                intent.setAction(MediaPlayerService.ACTION_RESUME);
+            } else {
+                intent.setAction(MediaPlayerService.ACTION_NOTHING);
+            }
+            startService(intent);
+        }
+    }
+
+    public void UpdateSongPlaying(String title, String artist) {
+        TextView titleText = (TextView) findViewById(R.id.player_song);
+        titleText.setText(title);
+        titleText.setSelected(true); // This will scroll the text if it is more than 1 line
+        TextView artistText = (TextView) findViewById(R.id.player_artist);
+        artistText.setText(artist);
+        if (mBound) {
+            String state = mService.getState();
+            ImageButton button = (ImageButton) findViewById(R.id.play_button);
+            if (state.equals(MediaPlayerService.PLAYING)) {
+                button.setImageResource(R.drawable.ic_action_pause);
+            } else if (state.equals(MediaPlayerService.PAUSED)) {
+                button.setImageResource(R.drawable.ic_action_play);
+            }
+        }
+
+    }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            MediaPlayerBinder binder = (MediaPlayerBinder) service;
+            mService = binder.getService();
+            mBound = true;
+            mService.setCallback(PlaylistContentsActivity.this);
+
+            // This will succeed if the service is re-connected, e.g. when configurations change.
+            // This block will make sure the "player" view contains the correct information.
+            try {
+                String state = mService.getState();
+                ImageButton button = (ImageButton) PlaylistContentsActivity.this
+                        .findViewById(R.id.play_button);
+                if (state.equals(MediaPlayerService.PLAYING)) {
+                    button.setImageResource(R.drawable.ic_action_pause);
+                } else if (state.equals(MediaPlayerService.PAUSED)) {
+                    button.setImageResource(R.drawable.ic_action_play);
+                }
+                mService.requestUpdate();
+            } catch (Exception e) {
+
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
 }

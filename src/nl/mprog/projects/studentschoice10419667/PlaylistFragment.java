@@ -188,7 +188,7 @@ public class PlaylistFragment extends Fragment {
                     cursor.moveToFirst();
                     playlistId = cursor.getInt(
                             cursor.getColumnIndex(MediaStore.Audio.Playlists._ID));
-                    
+
                     Intent intent = new Intent(getActivity(), PlaylistContentsActivity.class);
                     intent.putExtra(EXTRA_PLAYLIST_ID, playlistId);
                     startActivity(intent);
@@ -211,7 +211,7 @@ public class PlaylistFragment extends Fragment {
 
         String selection = MediaStore.Audio.Playlists.NAME + " = ? ";
         String[] selectionArgs = {
-            name
+                name
         };
 
         Cursor cursor = getActivity().getContentResolver().query(

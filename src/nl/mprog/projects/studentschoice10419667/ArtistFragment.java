@@ -51,10 +51,11 @@ public class ArtistFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         String[] fromColumns = {
-            MediaStore.Audio.Artists.ARTIST
+                MediaStore.Audio.Artists.ARTIST
         };
+        
         int[] toViews = {
-            R.id.item
+                R.id.item
         };
 
         String[] projection = {
@@ -76,18 +77,17 @@ public class ArtistFragment extends Fragment {
 
         final OnItemClickListener artistClickedHandler = new OnItemClickListener() {
             public void onItemClick(AdapterView parent, View v, int position, long id) {
-                
+
                 cursor.moveToPosition(position);
                 int artistId = cursor.getInt(cursor.getColumnIndex("_id"));
-                
+
                 Intent intent = new Intent(getActivity(), ArtistSongsActivity.class);
                 intent.putExtra(EXTRA_ARTIST_ID, artistId);
                 startActivity(intent);
-                
-                
+
             }
         };
-        
+
         artistList.setOnItemClickListener(artistClickedHandler);
     }
 }

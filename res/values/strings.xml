@@ -24,7 +24,14 @@
     <string name="delete_playlist">Deleting this Playlist</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    
-    
-    
+    <string name="delete">Delete</string>
+    <string name="selected">selected</string>
+    <string name="select_all">Select all</string>
+    <string name="title_activity_playlist_contents_add">PlaylistContentsAddActivity</string>
+    <string name="add">Add</string>
+    <string name="description_play_button">Button to pause and play songs</string>
+    <string name="description_previous_button">Button to go to previous song</string>
+    <string name="description_next_button">Button to go to next song</string>
+    <string name="notification_title">AudioPlayer is playing:</string>
+
 </resources>
