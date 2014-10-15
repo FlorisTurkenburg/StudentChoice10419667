@@ -1,11 +1,18 @@
-
+/*
+ * AudioPlayer app
+ * 
+ * Author: Floris Turkenburg
+ * UvANetID: 10419667
+ * Email: sk8_floris@hotmail.com
+ * 
+ * This is the Students Choice project for the Native Apps Studio course
+ */
 package nl.mprog.projects.studentschoice10419667;
 
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Audio;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
@@ -13,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 

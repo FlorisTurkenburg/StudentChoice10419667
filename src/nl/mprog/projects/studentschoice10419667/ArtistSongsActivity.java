@@ -1,4 +1,12 @@
-
+/*
+ * AudioPlayer app
+ * 
+ * Author: Floris Turkenburg
+ * UvANetID: 10419667
+ * Email: sk8_floris@hotmail.com
+ * 
+ * This is the Students Choice project for the Native Apps Studio course
+ */
 package nl.mprog.projects.studentschoice10419667;
 
 import android.content.ComponentName;
@@ -15,11 +23,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
 import nl.mprog.projects.studentschoice10419667.MediaPlayerService.MediaPlayerBinder;
 import nl.mprog.projects.studentschoice10419667.MediaPlayerService.MediaPlayerCallback;

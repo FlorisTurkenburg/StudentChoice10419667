@@ -1,4 +1,12 @@
-
+/*
+ * AudioPlayer app
+ * 
+ * Author: Floris Turkenburg
+ * UvANetID: 10419667
+ * Email: sk8_floris@hotmail.com
+ * 
+ * This is the Students Choice project for the Native Apps Studio course
+ */
 package nl.mprog.projects.studentschoice10419667;
 
 import android.app.AlertDialog;
