@@ -33,6 +33,7 @@ import nl.mprog.projects.studentschoice10419667.MediaPlayerService.MediaPlayerCa
 public class PlaylistContentsActivity extends ActionBarActivity implements MediaPlayerCallback {
     public static String PlaylistName;
     public static int playlist_id;
+    public static long playlist_id2;
     public static SimpleCursorAdapter adapter;
 
     MediaPlayerService mService;
@@ -56,15 +57,17 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
                 R.id.song_artist
         };
 
-        final Cursor cursor = getPlaylistContentCursor();
+        Cursor cursor = getPlaylistContentCursor();
 
         adapter = new SimpleCursorAdapter(this, R.layout.song_list_row, cursor,
                 fromColumns, toViews, 0);
         ListView songList = (ListView) findViewById(R.id.playlist_songs_listview);
         songList.setAdapter(adapter);
 
-        final OnItemClickListener songClickedHandler = new OnItemClickListener() {
+        songList.setOnItemClickListener(new OnItemClickListener() {
+
             public void onItemClick(AdapterView parent, View v, int position, long id) {
+                Cursor cursor = adapter.getCursor();
                 cursor.moveToPosition(position);
                 Toast.makeText(PlaylistContentsActivity.this,
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)),
@@ -75,12 +78,14 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
                         .getColumnIndex(MediaStore.Audio.Playlists.Members.DATA)));
                 intent.putExtra(MainActivity.EXTRA_SONG_ID, cursor.getInt(cursor
                         .getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID)));
+                intent.putExtra(MainActivity.EXTRA_PLAYLIST_ID, playlist_id2);
+                intent.putExtra(MainActivity.EXTRA_PLAY_ORDER, cursor.getInt(cursor
+                        .getColumnIndex(MediaStore.Audio.Playlists.Members.PLAY_ORDER)));
                 intent.setAction(MediaPlayerService.ACTION_PLAY);
                 startService(intent);
             }
-        };
+        });
 
-        songList.setOnItemClickListener(songClickedHandler);
     }
 
     @Override
@@ -103,7 +108,8 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
     @Override
     protected void onResume() {
         super.onResume();
-        adapter.swapCursor(getPlaylistContentCursor());
+        adapter.changeCursor(getPlaylistContentCursor());
+        adapter.notifyDataSetChanged();
     }
 
     public Cursor getPlaylistContentCursor() {
@@ -123,7 +129,7 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
                 null);
 
         cursor.moveToFirst();
-        long playlist_id2 = cursor.getLong(cursor.getColumnIndex("_id"));
+        playlist_id2 = cursor.getLong(cursor.getColumnIndex("_id"));
         PlaylistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Playlists.NAME));
         setTitle(PlaylistName);
 
@@ -134,6 +140,7 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
                     MediaStore.Audio.Playlists.Members.AUDIO_ID,
                     MediaStore.Audio.Playlists.Members.TITLE,
                     MediaStore.Audio.Playlists.Members.ARTIST,
+                    MediaStore.Audio.Playlists.Members.PLAY_ORDER,
                     MediaStore.Audio.Playlists.Members.DATA
             };
 
@@ -247,7 +254,7 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
 
         String selection = MediaStore.Audio.Playlists.NAME + " = ? ";
         String[] selectionArgs = {
-            name
+                name
         };
 
         Cursor cursor = getContentResolver().query(
@@ -326,9 +333,28 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
             } else if (state.equals(MediaPlayerService.PAUSED)) {
                 button.setImageResource(R.drawable.ic_action_pause);
                 intent.setAction(MediaPlayerService.ACTION_RESUME);
+            } else if (state.equals(MediaPlayerService.DONE)) {
+                button.setImageResource(R.drawable.ic_action_pause);
+                intent.setAction(MediaPlayerService.ACTION_START);
             } else {
                 intent.setAction(MediaPlayerService.ACTION_NOTHING);
             }
+            startService(intent);
+        }
+    }
+
+    public void nextButton(View view) {
+        if (mBound) {
+            Intent intent = new Intent(this, MediaPlayerService.class);
+            intent.setAction(MediaPlayerService.ACTION_NEXT);
+            startService(intent);
+        }
+    }
+
+    public void prevButton(View view) {
+        if (mBound) {
+            Intent intent = new Intent(this, MediaPlayerService.class);
+            intent.setAction(MediaPlayerService.ACTION_PREV);
             startService(intent);
         }
     }
@@ -345,6 +371,8 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
             if (state.equals(MediaPlayerService.PLAYING)) {
                 button.setImageResource(R.drawable.ic_action_pause);
             } else if (state.equals(MediaPlayerService.PAUSED)) {
+                button.setImageResource(R.drawable.ic_action_play);
+            } else if (state.equals(MediaPlayerService.DONE)) {
                 button.setImageResource(R.drawable.ic_action_play);
             }
         }

@@ -32,6 +32,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public static final String EXTRA_TAB = "studentschoice10419667.lastOpenedTab";
     public static final String EXTRA_DATA_URI = "studentschoice10419667.dataUri";
     public static final String EXTRA_SONG_ID = "studentschoice10419667.songId";
+    public static final String EXTRA_PLAYLIST_ID = "studentschoice10419667.playlistId";
+    public static final String EXTRA_PLAY_ORDER = "studentschoice10419667.playOrder";
+    
     public static final int SONGSTAB = 0;
     public static final int ARTISTSTAB = 1;
     public static final int PLAYLISTSTAB = 2;
@@ -259,9 +262,28 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             } else if (state.equals(MediaPlayerService.PAUSED)) {
                 button.setImageResource(R.drawable.ic_action_pause);
                 intent.setAction(MediaPlayerService.ACTION_RESUME);
+            } else if (state.equals(MediaPlayerService.DONE)) {
+                button.setImageResource(R.drawable.ic_action_pause);
+                intent.setAction(MediaPlayerService.ACTION_START);
             } else {
                 return;
             }
+            startService(intent);
+        }
+    }
+    
+    public void nextButton(View view) {
+        if (mBound) {
+            Intent intent = new Intent(this, MediaPlayerService.class);
+            intent.setAction(MediaPlayerService.ACTION_NEXT);
+            startService(intent);
+        }
+    }
+    
+    public void prevButton(View view) {
+        if (mBound) {
+            Intent intent = new Intent(this, MediaPlayerService.class);
+            intent.setAction(MediaPlayerService.ACTION_PREV);
             startService(intent);
         }
     }
@@ -278,6 +300,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             if (state.equals(MediaPlayerService.PLAYING)) {
                 button.setImageResource(R.drawable.ic_action_pause);
             } else if (state.equals(MediaPlayerService.PAUSED)) {
+                button.setImageResource(R.drawable.ic_action_play);
+            } else if (state.equals(MediaPlayerService.DONE)) {
                 button.setImageResource(R.drawable.ic_action_play);
             }
         }
@@ -312,6 +336,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
+            
         }
     };
 

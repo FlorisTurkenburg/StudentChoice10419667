@@ -136,9 +136,28 @@ public class ArtistSongsActivity extends ActionBarActivity implements MediaPlaye
             } else if (state.equals(MediaPlayerService.PAUSED)) {
                 button.setImageResource(R.drawable.ic_action_pause);
                 intent.setAction(MediaPlayerService.ACTION_RESUME);
+            } else if (state.equals(MediaPlayerService.DONE)) {
+                button.setImageResource(R.drawable.ic_action_pause);
+                intent.setAction(MediaPlayerService.ACTION_START);
             } else {
                 intent.setAction(MediaPlayerService.ACTION_NOTHING);
             }
+            startService(intent);
+        }
+    }
+    
+    public void nextButton(View view) {
+        if (mBound) {
+            Intent intent = new Intent(this, MediaPlayerService.class);
+            intent.setAction(MediaPlayerService.ACTION_NEXT);
+            startService(intent);
+        }
+    }
+    
+    public void prevButton(View view) {
+        if (mBound) {
+            Intent intent = new Intent(this, MediaPlayerService.class);
+            intent.setAction(MediaPlayerService.ACTION_PREV);
             startService(intent);
         }
     }
@@ -155,6 +174,8 @@ public class ArtistSongsActivity extends ActionBarActivity implements MediaPlaye
             if (state.equals(MediaPlayerService.PLAYING)) {
                 button.setImageResource(R.drawable.ic_action_pause);
             } else if (state.equals(MediaPlayerService.PAUSED)) {
+                button.setImageResource(R.drawable.ic_action_play);
+            } else if (state.equals(MediaPlayerService.DONE)) {
                 button.setImageResource(R.drawable.ic_action_play);
             }
         }

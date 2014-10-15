@@ -15,6 +15,7 @@
         android:layout_toLeftOf="@+id/play_button"
         android:layout_toStartOf="@+id/play_button"
         android:contentDescription="@string/description_previous_button"
+        android:onClick="prevButton"
         android:src="@drawable/ic_action_previous" />
 
     <TextView
@@ -64,6 +65,7 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:contentDescription="@string/description_next_button"
+        android:onClick="nextButton"
         android:src="@drawable/ic_action_next" />
 
 </RelativeLayout>
