@@ -19,14 +19,16 @@ MainActivity
   + Clicking on a playlist will open a new view displaying the songs and their artists which are in the playlist
   + This tab also provide a menu option to create a new playlist
 - The views of the tabs are filled in their corresponding Fragment.java classes (e.g. SongFragment.java)
-- All the views will have at the bottom a small audio player "widget" which displays the song and artist currently playing, and 3 buttons for previous song, next song, and pause/resume.
+- All the views will have at the bottom a small audio player "widget" which displays the song and artist currently playing, and 3 buttons for previous song, next song, and pause/resume. Previous and next buttons will only have an effect if the song that is playing is chosen from a playlist.
+- Option menu provides option to close the app completely (stopping and releasing the MediaPlayer, and stopping the Service)
 
 MediaPlayer
 ----------
-  - Service running asynchronously.
+  - Bounded Service running asynchronously.
+  - Uses a callback interface to provide the calling activity with updates.
   - Uses Wake Lock to prevent the system from stopping the CPU and thus stopping the playback.
   - It is a foreground Service to make it less likely to be killed and to provide a notification in the status bar.
-  - Handles Audio Focus to mute or lower the sound when other sounds/applications need the audio output.
+  - Handles Audio Focus to mute or lower the sound when other sounds/applications need the audio output. (Turns out to require min API level 8)
   - Handles AUDIO_BECOMING_NOISY intent to pause the audio when external speakers (e.g. earphones) are disconnected.
 
 Playlist
@@ -34,6 +36,7 @@ Playlist
 While in the view which displays the contents of a playlist, a menu is available with 4 options:
   - Delete; 
     + Opens a ListView of all the songs in the playlist with checkboxes. 
+    + Uses a custom adapter (CheckboxCursorAdapter) to provide and handle the checkboxes.
     + The selected songs are removed from the playlist when the user clicks on "Delete" in the ActionBar. 
     + Clicking on "Cancel" will leave the playlist unchanged.
     + The ActionBar also displays the amount of selections.
