@@ -8,11 +8,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="nl.mprog.projects.studentschoice10419667.MainActivity$PlaceholderFragment" >
 
-
     <ListView
         android:id="@+id/artist_listview"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        />
-    
+        android:layout_height="wrap_content" />
+
 </RelativeLayout>

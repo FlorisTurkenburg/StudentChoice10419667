@@ -7,6 +7,7 @@
  * 
  * This is the Students Choice project for the Native Apps Studio course
  */
+
 package nl.mprog.projects.studentschoice10419667;
 
 import android.content.ComponentName;
@@ -153,7 +154,7 @@ public class ArtistSongsActivity extends ActionBarActivity implements MediaPlaye
             startService(intent);
         }
     }
-    
+
     public void nextButton(View view) {
         if (mBound) {
             Intent intent = new Intent(this, MediaPlayerService.class);
@@ -161,7 +162,7 @@ public class ArtistSongsActivity extends ActionBarActivity implements MediaPlaye
             startService(intent);
         }
     }
-    
+
     public void prevButton(View view) {
         if (mBound) {
             Intent intent = new Intent(this, MediaPlayerService.class);

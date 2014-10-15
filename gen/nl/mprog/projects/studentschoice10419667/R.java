@@ -1307,6 +1307,7 @@ containing a value of this type.
         public static final int cancel=0x7f0a001f;
         public static final int close_app=0x7f0a0013;
         public static final int delete=0x7f0a0024;
+        public static final int delete_confirmation_message=0x7f0a002e;
         public static final int delete_playlist=0x7f0a0021;
         public static final int delete_songs=0x7f0a0019;
         public static final int description_next_button=0x7f0a002b;
@@ -1319,6 +1320,7 @@ containing a value of this type.
         public static final int no=0x7f0a0023;
         public static final int notification_title=0x7f0a002c;
         public static final int overflow=0x7f0a001c;
+        public static final int playlist_exists=0x7f0a002d;
         public static final int remove_playlist=0x7f0a001a;
         public static final int save=0x7f0a001e;
         public static final int select_all=0x7f0a0026;

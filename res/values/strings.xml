@@ -33,5 +33,7 @@
     <string name="description_previous_button">Button to go to previous song</string>
     <string name="description_next_button">Button to go to next song</string>
     <string name="notification_title">AudioPlayer is playing:</string>
+    <string name="playlist_exists">This name already exists!</string>
+    <string name="delete_confirmation_message">Are you sure you want to delete:</string>
 
 </resources>

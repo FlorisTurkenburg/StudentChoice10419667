@@ -7,6 +7,7 @@
  * 
  * This is the Students Choice project for the Native Apps Studio course
  */
+
 package nl.mprog.projects.studentschoice10419667;
 
 import android.app.AlertDialog;
@@ -194,8 +195,8 @@ public class PlaylistFragment extends Fragment {
 
                 if (cursor != null) {
                     cursor.moveToFirst();
-                    playlistId = cursor.getInt(
-                            cursor.getColumnIndex(MediaStore.Audio.Playlists._ID));
+                    playlistId = cursor.getInt(cursor
+                            .getColumnIndex(MediaStore.Audio.Playlists._ID));
 
                     Intent intent = new Intent(getActivity(), PlaylistContentsActivity.class);
                     intent.putExtra(EXTRA_PLAYLIST_ID, playlistId);
@@ -204,8 +205,8 @@ public class PlaylistFragment extends Fragment {
             }
 
         } else {
-            Toast.makeText(getActivity().getApplicationContext(), "This name already exists!",
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity().getApplicationContext(),
+                    getString(R.string.playlist_exists), Toast.LENGTH_LONG).show();
         }
 
     }

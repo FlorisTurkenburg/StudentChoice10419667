@@ -7,6 +7,7 @@
  * 
  * This is the Students Choice project for the Native Apps Studio course
  */
+
 package nl.mprog.projects.studentschoice10419667;
 
 import android.app.AlertDialog;
@@ -247,8 +248,8 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
 
             setTitle(newName);
         } else {
-            Toast.makeText(getApplicationContext(), "This name already exists!", Toast.LENGTH_LONG)
-                    .show();
+            Toast.makeText(getApplicationContext(), getString(R.string.playlist_exists),
+                    Toast.LENGTH_LONG).show();
         }
 
     }
@@ -297,7 +298,7 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
         AlertDialog.Builder builder = new AlertDialog.Builder(PlaylistContentsActivity.this);
 
         builder.setTitle(R.string.delete_playlist).setIcon(R.drawable.ic_action_discard);
-        builder.setMessage("Are you sure you want to delete:\n" + PlaylistName);
+        builder.setMessage(getString(R.string.delete_confirmation_message) + "\n" + PlaylistName);
 
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 

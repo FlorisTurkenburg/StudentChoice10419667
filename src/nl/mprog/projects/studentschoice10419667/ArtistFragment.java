@@ -7,6 +7,7 @@
  * 
  * This is the Students Choice project for the Native Apps Studio course
  */
+
 package nl.mprog.projects.studentschoice10419667;
 
 import android.content.Intent;
@@ -61,7 +62,7 @@ public class ArtistFragment extends Fragment {
         String[] fromColumns = {
                 MediaStore.Audio.Artists.ARTIST
         };
-        
+
         int[] toViews = {
                 R.id.item
         };

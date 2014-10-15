@@ -7,6 +7,7 @@
  * 
  * This is the Students Choice project for the Native Apps Studio course
  */
+
 package nl.mprog.projects.studentschoice10419667;
 
 import android.content.ComponentName;
@@ -40,7 +41,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public static final String EXTRA_SONG_ID = "studentschoice10419667.songId";
     public static final String EXTRA_PLAYLIST_ID = "studentschoice10419667.playlistId";
     public static final String EXTRA_PLAY_ORDER = "studentschoice10419667.playOrder";
-    
+
     public static final int SONGSTAB = 0;
     public static final int ARTISTSTAB = 1;
     public static final int PLAYLISTSTAB = 2;
@@ -118,7 +119,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             mBound = false;
         }
     }
-    
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -126,7 +127,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             unbindService(mConnection);
             mBound = false;
         }
-        
+
     }
 
     @Override
@@ -223,7 +224,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
-
     public void playButton(View view) {
 
         if (mBound) {
@@ -246,7 +246,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             startService(intent);
         }
     }
-    
+
     public void nextButton(View view) {
         if (mBound) {
             Intent intent = new Intent(this, MediaPlayerService.class);
@@ -254,7 +254,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             startService(intent);
         }
     }
-    
+
     public void prevButton(View view) {
         if (mBound) {
             Intent intent = new Intent(this, MediaPlayerService.class);
@@ -311,7 +311,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
-            
+
         }
     };
 
