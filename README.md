@@ -1,3 +1,17 @@
+## Deployment Instructions:
+  # Clone repo  
+  git clone git@github.com:FlorisTurkenburg/StudentChoice10419667.git FlorisTurkenburg
+  
+  # Import project into Eclipse  
+  In eclipse: File -> Import -> General -> Existing Projects into Workspace -> Set the root directory to the FlorisTurkenburg directory -> Finish  
+  
+  # Include the Support Library (appcompat_v7)  
+  Make sure you have the Android Support Library, else install it with the SDK Manager.  
+  In Eclipse: Project -> Properties -> Android, add the appcompat_v7 to the libraries.
+  
+  # Run the app  
+  Press ctrl+F11, or click Run -> Run and select the Android device or AVD on which you want to install the app.
+
 Audio Player app
 =====================
 The goal of this project is to build an Android Application that plays music which is stored on the device, and has the possibility to create playlists.
