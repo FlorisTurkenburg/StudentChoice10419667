@@ -40,10 +40,10 @@ import nl.mprog.projects.studentschoice10419667.MediaPlayerService.MediaPlayerBi
 import nl.mprog.projects.studentschoice10419667.MediaPlayerService.MediaPlayerCallback;
 
 public class PlaylistContentsActivity extends ActionBarActivity implements MediaPlayerCallback {
-    public static String PlaylistName;
-    public static int playlist_id;
-    public static long playlist_id2;
-    public static SimpleCursorAdapter adapter;
+    private static String playlistName;
+    private static int playlist_id;
+    private static long playlist_id2;
+    private static SimpleCursorAdapter adapter;
 
     MediaPlayerService mService;
     boolean mBound = false;
@@ -75,7 +75,7 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
 
         songList.setOnItemClickListener(new OnItemClickListener() {
 
-            public void onItemClick(AdapterView parent, View v, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 Cursor cursor = adapter.getCursor();
                 cursor.moveToPosition(position);
                 Toast.makeText(PlaylistContentsActivity.this,
@@ -90,6 +90,7 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
                 intent.putExtra(MainActivity.EXTRA_PLAYLIST_ID, playlist_id2);
                 intent.putExtra(MainActivity.EXTRA_PLAY_ORDER, cursor.getInt(cursor
                         .getColumnIndex(MediaStore.Audio.Playlists.Members.PLAY_ORDER)));
+                intent.putExtra(MainActivity.EXTRA_FROM, MainActivity.PLAYLISTSTAB);
                 intent.setAction(MediaPlayerService.ACTION_PLAY);
                 startService(intent);
             }
@@ -139,8 +140,8 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
 
         cursor.moveToFirst();
         playlist_id2 = cursor.getLong(cursor.getColumnIndex("_id"));
-        PlaylistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Playlists.NAME));
-        setTitle(PlaylistName);
+        playlistName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Playlists.NAME));
+        setTitle(playlistName);
 
         if (playlist_id2 > 0) {
 
@@ -203,12 +204,12 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
 
         builder.setTitle(R.string.edit_title).setIcon(R.drawable.ic_action_edit);
 
-        View layout = inflater.inflate(R.layout.edit_title_dialog, null);
+        View layout = inflater.inflate(R.layout.dialog_edit_title, null);
 
         builder.setView(layout);
 
         final EditText editText = (EditText) layout.findViewById(R.id.edit_title_text);
-        editText.setText(PlaylistName, BufferType.EDITABLE);
+        editText.setText(playlistName, BufferType.EDITABLE);
 
         builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
 
@@ -298,7 +299,7 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
         AlertDialog.Builder builder = new AlertDialog.Builder(PlaylistContentsActivity.this);
 
         builder.setTitle(R.string.delete_playlist).setIcon(R.drawable.ic_action_discard);
-        builder.setMessage(getString(R.string.delete_confirmation_message) + "\n" + PlaylistName);
+        builder.setMessage(getString(R.string.delete_confirmation_message) + "\n" + playlistName);
 
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
@@ -332,18 +333,14 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
     public void playButton(View view) {
 
         if (mBound) {
-            ImageButton button = (ImageButton) view.findViewById(R.id.play_button);
             Intent intent = new Intent(this, MediaPlayerService.class);
             String state = mService.getState();
 
             if (state.equals(MediaPlayerService.PLAYING)) {
-                button.setImageResource(R.drawable.ic_action_play);
                 intent.setAction(MediaPlayerService.ACTION_PAUSE);
             } else if (state.equals(MediaPlayerService.PAUSED)) {
-                button.setImageResource(R.drawable.ic_action_pause);
                 intent.setAction(MediaPlayerService.ACTION_RESUME);
             } else if (state.equals(MediaPlayerService.DONE)) {
-                button.setImageResource(R.drawable.ic_action_pause);
                 intent.setAction(MediaPlayerService.ACTION_START);
             } else {
                 intent.setAction(MediaPlayerService.ACTION_NOTHING);
@@ -368,7 +365,7 @@ public class PlaylistContentsActivity extends ActionBarActivity implements Media
         }
     }
 
-    public void UpdateSongPlaying(String title, String artist) {
+    public void updateSongPlaying(String title, String artist) {
         TextView titleText = (TextView) findViewById(R.id.player_song);
         titleText.setText(title);
         titleText.setSelected(true); // This will scroll the text if it is more than 1 line

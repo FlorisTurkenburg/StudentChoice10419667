@@ -47,9 +47,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     private static String songPlayingName;
     private static String songPlayingArtist;
     private static int songId;
+    private static int artistId;
     private static long playlistId;
     private static int playOrder;
-    private static boolean isPlaylist = false;
+
+    private static int from;
 
     private static String prevUri;
     private static String nextUri;
@@ -68,30 +70,45 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String action = intent.getAction();
-        if (action.equals(ACTION_PLAY)) {
-            String myUri = intent.getStringExtra(MainActivity.EXTRA_DATA_URI);
-            songId = intent.getIntExtra(MainActivity.EXTRA_SONG_ID, -1);
-            playlistId = intent.getLongExtra(MainActivity.EXTRA_PLAYLIST_ID, 0);
-            playOrder = intent.getIntExtra(MainActivity.EXTRA_PLAY_ORDER, -1);
-            isPlaylist = playlistId > 0;
-
-            playNewSong(myUri);
-
-        } else if (action.equals(ACTION_PAUSE)) {
-            pauseSong();
-        } else if (action.equals(ACTION_RESUME)) {
-            resumeSong();
-        } else if (action.equals(ACTION_NEXT)) {
-            playNext();
-        } else if (action.equals(ACTION_PREV)) {
-            playPrev();
-        } else if (action.equals(ACTION_START)) {
-            startSong();
-        } else if (action.equals(ACTION_NOTHING)) {
-
+        try {
+            String action = intent.getAction();
+        
+            if (action.equals(ACTION_PLAY)) {
+                String myUri = intent.getStringExtra(MainActivity.EXTRA_DATA_URI);
+                songId = intent.getIntExtra(MainActivity.EXTRA_SONG_ID, -1);
+                from = intent.getIntExtra(MainActivity.EXTRA_FROM, -1);
+                
+                switch (from) {
+                    case MainActivity.SONGSTAB:
+                        break;
+                    case MainActivity.ARTISTSTAB:
+                        artistId = intent.getIntExtra(MainActivity.EXTRA_ARTIST_ID, -1);
+                        break;
+                    case MainActivity.PLAYLISTSTAB:
+                        playlistId = intent.getLongExtra(MainActivity.EXTRA_PLAYLIST_ID, 0);
+                        playOrder = intent.getIntExtra(MainActivity.EXTRA_PLAY_ORDER, -1);
+                        break;
+                        
+                }
+    
+                playNewSong(myUri);
+    
+            } else if (action.equals(ACTION_PAUSE)) {
+                pauseSong();
+            } else if (action.equals(ACTION_RESUME)) {
+                resumeSong();
+            } else if (action.equals(ACTION_NEXT)) {
+                playNext();
+            } else if (action.equals(ACTION_PREV)) {
+                playPrev();
+            } else if (action.equals(ACTION_START)) {
+                startSong();
+            } else if (action.equals(ACTION_NOTHING)) {
+    
+            }
+        } catch (NullPointerException e) {
         }
-
+        
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -104,20 +121,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     public void onPrepared(MediaPlayer player) {
         player.start();
         state = PLAYING;
-        showNotification();
+        showNotification(true);
         if (callback != null) {
-            callback.UpdateSongPlaying(songPlayingName, songPlayingArtist);
+            callback.updateSongPlaying(songPlayingName, songPlayingArtist);
         }
     }
 
-    public void onStop() {
-
-    }
 
     public void onDestroy() {
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.stop();
         }
+        stopForeground(true);
         mMediaPlayer.release();
         mMediaPlayer = null;
         state = null;
@@ -132,13 +147,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     }
 
     public void onCompletion(MediaPlayer player) {
-        if (isPlaylist) {
+        if (from != -1) {
             playNext();
         } else {
             state = DONE;
             stopForeground(true);
             if (callback != null) {
-                callback.UpdateSongPlaying(songPlayingName, songPlayingArtist);
+                callback.updateSongPlaying(songPlayingName, songPlayingArtist);
             }
         }
     }
@@ -170,29 +185,134 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
         mMediaPlayer.setOnErrorListener(this);
         mMediaPlayer.prepareAsync(); // prepare async to not block main thread
 
-        if (isPlaylist) {
+        if (from != -1) {
             setPrevAndNextSong();
         }
     }
 
     public void playNext() {
-        if (isPlaylist) {
+        
+        if (from != -1) {
             songId = nextId;
-            playOrder = nextPlayOrder;
+            if (from == MainActivity.PLAYLISTSTAB) {
+                playOrder = nextPlayOrder;
+            }
             playNewSong(nextUri);
         }
 
     }
 
     public void playPrev() {
-        if (isPlaylist) {
+        if (from != -1) {
             songId = prevId;
-            playOrder = prevPlayOrder;
+            if (from == MainActivity.PLAYLISTSTAB) {
+                playOrder = prevPlayOrder;
+            }
             playNewSong(prevUri);
         }
     }
-
+    
     public void setPrevAndNextSong() {
+        switch (from) {
+            case MainActivity.SONGSTAB:
+                setPrevAndNextSongAllSongs();
+                break;
+            case MainActivity.ARTISTSTAB:
+                setPrevAndNextSongArtist();
+                break;
+            case MainActivity.PLAYLISTSTAB:
+                setPrevAndNextSongPlaylist();
+                break;
+        }
+    }
+    
+    public void setPrevAndNextSongAllSongs() {
+        String[] projection = {
+                MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.DATA
+        };
+
+        Cursor cursor = getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                null,
+                null,
+                MediaStore.Audio.Media.TITLE);
+        
+        int count = cursor.getCount();
+        int row = -1;
+        for (int i = 0; i < count; i++) {
+            cursor.moveToPosition(i);
+            if (songId == cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID))) {
+                row = i;
+                break;
+            }
+        }
+
+        if (row != -1) {
+            // The default repeat mode used here is Repeat all, so after the last song comes the 
+            // first song, and before the first comes the last.
+            if (cursor.moveToPosition(row - 1)) {
+            } else {
+                cursor.moveToLast();
+            }
+            prevUri = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+            prevId = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
+
+            if (cursor.moveToPosition(row + 1)) {
+            } else {
+                cursor.moveToFirst();
+            }
+            nextUri = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+            nextId = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
+        }
+    }
+
+    public void setPrevAndNextSongArtist() {
+        String[] projection = {
+                MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.ARTIST_ID, MediaStore.Audio.Media.DATA
+        };
+        String selection = MediaStore.Audio.Media.ARTIST_ID + " = " + artistId;
+
+        Cursor cursor = getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                selection,
+                null,
+                MediaStore.Audio.Media.TITLE);
+    
+        int count = cursor.getCount();
+        int row = -1;
+        for (int i = 0; i < count; i++) {
+            cursor.moveToPosition(i);
+            if (songId == cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID))) {
+                row = i;
+                break;
+            }
+        }
+
+        if (row != -1) {
+            // The default repeat mode used here is Repeat all, so after the last song comes the 
+            // first song, and before the first comes the last.
+            if (cursor.moveToPosition(row - 1)) {
+            } else {
+                cursor.moveToLast();
+            }
+            prevUri = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+            prevId = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
+
+            if (cursor.moveToPosition(row + 1)) {
+            } else {
+                cursor.moveToFirst();
+            }
+            nextUri = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+            nextId = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
+        }
+    
+    }
+    
+    public void setPrevAndNextSongPlaylist() {
         String[] projection = {
                 MediaStore.Audio.Playlists.Members._ID,
                 MediaStore.Audio.Playlists.Members.AUDIO_ID,
@@ -254,19 +374,29 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
         if (mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
             state = PAUSED;
-
+            showNotification(false);
+            if (callback != null) {
+                callback.updateSongPlaying(songPlayingName, songPlayingArtist);
+            }
         }
     }
 
     public void resumeSong() {
         mMediaPlayer.start();
         state = PLAYING;
+        showNotification(true);
+        if (callback != null) {
+            callback.updateSongPlaying(songPlayingName, songPlayingArtist);
+        }
     }
 
     public void startSong() {
         mMediaPlayer.start();
         state = PLAYING;
-        showNotification();
+        showNotification(true);
+        if (callback != null) {
+            callback.updateSongPlaying(songPlayingName, songPlayingArtist);
+        }
     }
 
     public void setTitleAndArtist() {
@@ -289,14 +419,26 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
         cursor.close();
     }
 
-    public void showNotification() {
+    public void showNotification(boolean playing) {
+        String tickerText;
+        String contentTitle;
+        int iconId;
+        if (playing) {
+            contentTitle = getString(R.string.notification_title_playing);
+            tickerText = contentTitle + "\n" + songPlayingName + "\n" + songPlayingArtist;
+            iconId = R.drawable.ic_action_play;
+        } else {
+            contentTitle = getString(R.string.notification_title_paused);
+            tickerText = contentTitle;
+            iconId = R.drawable.ic_action_pause;
+        }
+        
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_action_play)
-                .setContentTitle(getString(R.string.notification_title))
+                .setSmallIcon(iconId)
+                .setContentTitle(contentTitle)
                 .setContentText(songPlayingName)
                 .setSubText(songPlayingArtist)
-                .setTicker(getString(R.string.notification_title) + "\n" + songPlayingName + "\n" +
-                        songPlayingArtist)
+                .setTicker(tickerText)
                 .setOngoing(true);
 
         Intent resultIntent = new Intent(this, MainActivity.class);
@@ -317,7 +459,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
 
     public void requestUpdate() {
         if (callback != null) {
-            callback.UpdateSongPlaying(songPlayingName, songPlayingArtist);
+            callback.updateSongPlaying(songPlayingName, songPlayingArtist);
         }
     }
 
@@ -332,7 +474,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     }
 
     public interface MediaPlayerCallback {
-        public void UpdateSongPlaying(String title, String artist);
+        public void updateSongPlaying(String title, String artist);
     }
 
 }

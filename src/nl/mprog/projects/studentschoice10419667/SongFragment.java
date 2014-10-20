@@ -44,9 +44,7 @@ public class SongFragment extends Fragment {
         return fragment;
     }
 
-    public SongFragment() {
-    }
-
+ 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -87,7 +85,7 @@ public class SongFragment extends Fragment {
         songsList.setAdapter(adapter);
 
         final OnItemClickListener songClickedHandler = new OnItemClickListener() {
-            public void onItemClick(AdapterView parent, View v, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 cursor.moveToPosition(position);
                 Toast.makeText(getActivity(),
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)),
@@ -98,6 +96,7 @@ public class SongFragment extends Fragment {
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                 intent.putExtra(MainActivity.EXTRA_SONG_ID,
                         cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+                intent.putExtra(MainActivity.EXTRA_FROM, MainActivity.SONGSTAB);
                 intent.setAction(MediaPlayerService.ACTION_PLAY);
                 getActivity().startService(intent);
             }

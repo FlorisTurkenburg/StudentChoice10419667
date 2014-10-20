@@ -44,8 +44,7 @@ public class ArtistFragment extends Fragment {
         return fragment;
     }
 
-    public ArtistFragment() {
-    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -85,7 +84,7 @@ public class ArtistFragment extends Fragment {
         artistList.setAdapter(adapter);
 
         final OnItemClickListener artistClickedHandler = new OnItemClickListener() {
-            public void onItemClick(AdapterView parent, View v, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
                 cursor.moveToPosition(position);
                 int artistId = cursor.getInt(cursor.getColumnIndex("_id"));

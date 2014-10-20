@@ -39,8 +39,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public static final String EXTRA_TAB = "studentschoice10419667.lastOpenedTab";
     public static final String EXTRA_DATA_URI = "studentschoice10419667.dataUri";
     public static final String EXTRA_SONG_ID = "studentschoice10419667.songId";
+    public static final String EXTRA_ARTIST_ID = "studentschoice10419667.artistId";
     public static final String EXTRA_PLAYLIST_ID = "studentschoice10419667.playlistId";
     public static final String EXTRA_PLAY_ORDER = "studentschoice10419667.playOrder";
+    public static final String EXTRA_FROM = "studentschoice10419667.from";
 
     public static final int SONGSTAB = 0;
     public static final int ARTISTSTAB = 1;
@@ -120,15 +122,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mBound) {
-            unbindService(mConnection);
-            mBound = false;
-        }
-
-    }
 
     @Override
     protected void onResume() {
@@ -227,18 +220,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public void playButton(View view) {
 
         if (mBound) {
-            ImageButton button = (ImageButton) view.findViewById(R.id.play_button);
             Intent intent = new Intent(this, MediaPlayerService.class);
             String state = mService.getState();
 
             if (state.equals(MediaPlayerService.PLAYING)) {
-                button.setImageResource(R.drawable.ic_action_play);
                 intent.setAction(MediaPlayerService.ACTION_PAUSE);
             } else if (state.equals(MediaPlayerService.PAUSED)) {
-                button.setImageResource(R.drawable.ic_action_pause);
                 intent.setAction(MediaPlayerService.ACTION_RESUME);
             } else if (state.equals(MediaPlayerService.DONE)) {
-                button.setImageResource(R.drawable.ic_action_pause);
                 intent.setAction(MediaPlayerService.ACTION_START);
             } else {
                 return;
@@ -263,7 +252,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
-    public void UpdateSongPlaying(String title, String artist) {
+    public void updateSongPlaying(String title, String artist) {
         TextView titleText = (TextView) findViewById(R.id.player_song);
         titleText.setText(title);
         titleText.setSelected(true); // This will scroll the text if it is more than 1 line

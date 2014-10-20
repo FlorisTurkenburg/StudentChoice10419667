@@ -54,8 +54,7 @@ public class PlaylistFragment extends Fragment {
         return fragment;
     }
 
-    public PlaylistFragment() {
-    }
+    
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -120,7 +119,7 @@ public class PlaylistFragment extends Fragment {
         playlistList.setAdapter(adapter);
 
         final OnItemClickListener playlistClickedHandler = new OnItemClickListener() {
-            public void onItemClick(AdapterView parent, View v, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
                 cursor.moveToPosition(position);
                 int playlistId = cursor.getInt(cursor.getColumnIndex("_id"));
@@ -142,7 +141,7 @@ public class PlaylistFragment extends Fragment {
 
         builder.setTitle(R.string.new_playlist).setIcon(R.drawable.ic_action_edit);
 
-        View layout = inflater.inflate(R.layout.edit_title_dialog, null);
+        View layout = inflater.inflate(R.layout.dialog_edit_title, null);
 
         builder.setView(layout);
 

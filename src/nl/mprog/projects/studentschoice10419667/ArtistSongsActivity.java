@@ -20,8 +20,6 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -77,7 +75,7 @@ public class ArtistSongsActivity extends ActionBarActivity implements MediaPlaye
         songList.setAdapter(adapter);
 
         final OnItemClickListener songClickedHandler = new OnItemClickListener() {
-            public void onItemClick(AdapterView parent, View v, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 cursor.moveToPosition(position);
                 Toast.makeText(ArtistSongsActivity.this,
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)),
@@ -88,6 +86,8 @@ public class ArtistSongsActivity extends ActionBarActivity implements MediaPlaye
                         cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
                 intent.putExtra(MainActivity.EXTRA_SONG_ID,
                         cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+                intent.putExtra(MainActivity.EXTRA_ARTIST_ID, artist_id);
+                intent.putExtra(MainActivity.EXTRA_FROM, MainActivity.ARTISTSTAB);
                 intent.setAction(MediaPlayerService.ACTION_PLAY);
                 startService(intent);
             }
@@ -96,24 +96,6 @@ public class ArtistSongsActivity extends ActionBarActivity implements MediaPlaye
         songList.setOnItemClickListener(songClickedHandler);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.artist_songs, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     protected void onStart() {
@@ -135,18 +117,14 @@ public class ArtistSongsActivity extends ActionBarActivity implements MediaPlaye
     public void playButton(View view) {
 
         if (mBound) {
-            ImageButton button = (ImageButton) view.findViewById(R.id.play_button);
             Intent intent = new Intent(this, MediaPlayerService.class);
             String state = mService.getState();
 
             if (state.equals(MediaPlayerService.PLAYING)) {
-                button.setImageResource(R.drawable.ic_action_play);
                 intent.setAction(MediaPlayerService.ACTION_PAUSE);
             } else if (state.equals(MediaPlayerService.PAUSED)) {
-                button.setImageResource(R.drawable.ic_action_pause);
                 intent.setAction(MediaPlayerService.ACTION_RESUME);
             } else if (state.equals(MediaPlayerService.DONE)) {
-                button.setImageResource(R.drawable.ic_action_pause);
                 intent.setAction(MediaPlayerService.ACTION_START);
             } else {
                 intent.setAction(MediaPlayerService.ACTION_NOTHING);
@@ -171,7 +149,7 @@ public class ArtistSongsActivity extends ActionBarActivity implements MediaPlaye
         }
     }
 
-    public void UpdateSongPlaying(String title, String artist) {
+    public void updateSongPlaying(String title, String artist) {
         TextView titleText = (TextView) findViewById(R.id.player_song);
         titleText.setText(title);
         titleText.setSelected(true); // This will scroll the text if it is more than 1 line

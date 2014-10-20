@@ -31,12 +31,12 @@ import java.util.List;
 
 public class PlaylistContentsAddActivity extends ActionBarActivity implements
         UpdateSelectedCallback {
-    public static String PlaylistName;
-    public static int playlist_id;
-    public static long playlist_id2;
-    public static int numOfSongs;
+    
+    private static int playlist_id;
+    private static long playlist_id2;
+    private static int numOfSongs;
     private Cursor cursor;
-    CheckboxCursorAdapter adapter;
+    private CheckboxCursorAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,8 +179,7 @@ public class PlaylistContentsAddActivity extends ActionBarActivity implements
     public void setPlaylistID() {
 
         String[] projection = {
-                MediaStore.Audio.Playlists._ID,
-                MediaStore.Audio.Playlists.NAME
+                MediaStore.Audio.Playlists._ID
         };
 
         String selection = MediaStore.Audio.Playlists._ID + " = " + playlist_id;
