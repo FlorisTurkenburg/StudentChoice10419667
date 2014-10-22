@@ -19,7 +19,7 @@ MainActivity
   + Clicking on a playlist will open a new view displaying the songs and their artists which are in the playlist
   + This tab also provide a menu option to create a new playlist
 - The views of the tabs are filled in their corresponding Fragment.java classes (e.g. SongFragment.java)
-- All the views will have at the bottom a small audio player "widget" which displays the song and artist currently playing, and 3 buttons for previous song, next song, and pause/resume. Previous and next buttons will only have an effect if the song that is playing is chosen from a playlist.
+- All the views will have at the bottom a small audio player "widget" which displays the song and artist currently playing, and 3 buttons for previous song, next song, and pause/resume. 
 - Option menu provides option to close the app completely (stopping and releasing the MediaPlayer, and stopping the Service)
 
 MediaPlayer
@@ -44,10 +44,8 @@ While in the view which displays the contents of a playlist, a menu is available
   - Change Title;
     + Opens a dialog to edit the name of the playlist.
   - Add Songs;
-    + Opens a new View containing two tabs: Songs and Artists.
-    + Each tab displays the corresponding ListView of songs and artists with checkboxes.
+    + Opens a new View containing a list of all Songs with checkboxes
     + Clicking on "Done" in the ActionBar will add the selected songs to the playlist.
-    + Basicly this is similar to the Main screen, excluding the third tab, and with checkboxes for the songs.
   - Remove Playlist;
     + This will delete the playlist after getting a confirmation from the user via an AlertDialog.
 
